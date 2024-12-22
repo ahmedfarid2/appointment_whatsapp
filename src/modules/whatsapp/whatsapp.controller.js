@@ -1,3 +1,7 @@
+import {
+  markMessageAsRead,
+  sendWhatsappMessage,
+} from "../../services/whatsapp.services.js";
 import { asyncHandler } from "../../utils/errorHandling.js";
 
 export const verifyToken = asyncHandler(async (req, res, next) => {
@@ -26,11 +30,15 @@ export const handleIncomingMessages = asyncHandler(async (req, res, next) => {
   const { from, id, type } = messages[0];
   await markMessageAsRead(id);
   if (type === "text") {
-    await sendWhatsappMessage({
-      messaging_product: "whatsapp",
-      recipient_id: from,
-      message_type: "text",
-      text: "Hello from the other side",
-    });
+    await sendWhatsappMessage(
+      JSON.stringify({
+        messaging_product: "whatsapp",
+        to: from,
+        text: {
+          body: "Hello from Whatsapp API",
+        },
+        type: "text",
+      })
+    );
   }
 });
