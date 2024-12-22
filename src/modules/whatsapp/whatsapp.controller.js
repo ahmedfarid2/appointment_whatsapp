@@ -22,4 +22,13 @@ export const handleIncomingMessages = asyncHandler(async (req, res, next) => {
   }
   console.log(messages);
   const { from, id, type } = messages[0];
+  await markMessageAsRead(id);
+  if (type === "text") {
+    await sendWhatsappMessage({
+      messaging_product: "whatsapp",
+      recipient_id: from,
+      message_type: "text",
+      text: "Hello from the other side",
+    });
+  }
 });
