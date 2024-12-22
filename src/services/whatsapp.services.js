@@ -5,7 +5,7 @@ export const markMessageAsRead = async (messageId) =>
     process.env.WHATSAPP_API_URL,
     {
       messaging_product: "whatsapp",
-      receipt_id: messageId,
+      message_id: messageId,
       status: "read",
     },
     {

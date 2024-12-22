@@ -34,10 +34,10 @@ export const handleIncomingMessages = asyncHandler(async (req, res, next) => {
       JSON.stringify({
         messaging_product: "whatsapp",
         to: from,
+        type: "text",
         text: {
           body: "Hello from Whatsapp API",
         },
-        type: "text",
       })
     );
   }
