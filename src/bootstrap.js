@@ -1,4 +1,4 @@
-import { whatsappRouter } from "./modules";
+import { whatsappRouter } from "./modules/index.js";
 import { globalResponse } from "./utils/errorHandling.js";
 
 const bootstrap = (app, express) => {
