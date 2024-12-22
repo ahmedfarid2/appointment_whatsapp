@@ -1,4 +1,4 @@
-import { asyncHandler } from "../../utils/errorHandling";
+import { asyncHandler } from "../../utils/errorHandling.js";
 
 export const verifyToken = asyncHandler(async (req, res, next) => {
   const { query } = req;
