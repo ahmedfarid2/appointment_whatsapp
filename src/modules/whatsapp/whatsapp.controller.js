@@ -1,3 +1,5 @@
+import { asyncHandler } from "../../utils/errorHandling";
+
 export const verifyToken = asyncHandler(async (req, res, next) => {
   const { query } = req;
   const { "hub.verify_token": verifyToken, "hub.challenge": challenge } = query;
