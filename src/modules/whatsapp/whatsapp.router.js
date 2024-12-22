@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { handleIncomingMessages, verifyToken } from "./whatsapp.controller.js";
+import { receivedMessage, verifyToken } from "./whatsapp.controller.js";
 
 const router = Router();
 
 router.get("/", verifyToken);
-router.post("/", handleIncomingMessages);
+router.post("/", receivedMessage);
 export default router;
