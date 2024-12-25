@@ -25,14 +25,27 @@ const userSessions = {};
 
 // ============== Receive Message ==============
 export const receivedMessage = asyncHandler(async (req, res, next) => {
-  console.log("Webhook Payload:", JSON.stringify(req.body, null, 2));
+  const payload = req.body;
+  console.log("Webhook Payload:", JSON.stringify(payload, null, 2));
 
-  const messages = req.body.entry?.[0]?.changes?.[0]?.value?.messages;
+  const changes = payload.entry?.[0]?.changes?.[0]?.value;
+
+  // Handle statuses payload
+  if (changes.statuses) {
+    console.log(
+      "Received statuses update:",
+      JSON.stringify(changes.statuses, null, 2)
+    );
+    return res.status(200).json({ message: "Statuses processed" });
+  }
+
+  // Handle messages payload
+  const messages = changes.messages;
 
   if (!messages || !messages.length) {
     console.error(
       "No messages found in payload:",
-      JSON.stringify(req.body, null, 2)
+      JSON.stringify(payload, null, 2)
     );
     return next(new Error("No messages found", { cause: 404 }));
   }
@@ -79,6 +92,6 @@ export const receivedMessage = asyncHandler(async (req, res, next) => {
   userSessions[from] = session;
 
   if (!res.headersSent) {
-    res.status(200).json({ message: "ok" });
+    res.status(200).json({ message: "Message processed" });
   }
 });

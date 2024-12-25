@@ -111,23 +111,62 @@ export const handleListReply = async (list_reply, from, session, next) => {
   const { id: listId } = list_reply;
   const { item } = findItemById(listId);
 
-  if (item && item.title) {
-    session.selections.time = item;
+  if (!item || !item.title) {
+    console.error("Invalid item found:", item);
+    return next(new Error("Invalid list reply selection", { cause: 400 }));
   }
 
-  await sendWhatsAppMessage(
-    sampleConfirmMenu({
-      number: from,
-      selections: [
-        { title: session.selections.specialty.title },
-        { title: session.selections.time.title },
-      ],
-    })
-  ).catch((error) =>
-    next(
-      new Error(error?.response.data || "Failed to send message", {
-        cause: 500,
+  // Assign specialty or time based on the selection
+  if (
+    item.id === "cardiology" ||
+    item.id === "dermatology" ||
+    item.id === "pediatrics"
+  ) {
+    session.selections.specialty = item;
+  } else if (
+    item.id === "morning" ||
+    item.id === "afternoon" ||
+    item.id === "evening"
+  ) {
+    session.selections.time = item;
+  } else {
+    console.error("Unknown selection type:", item);
+    return next(new Error("Unknown selection type", { cause: 400 }));
+  }
+
+  // Ensure both specialty and time exist before sending confirmation
+  if (session.selections.specialty && session.selections.time) {
+    await sendWhatsAppMessage(
+      sampleConfirmMenu({
+        number: from,
+        selections: [
+          { title: session.selections.specialty.title },
+          { title: session.selections.time.title },
+        ],
       })
-    )
-  );
+    ).catch((error) =>
+      next(
+        new Error(error?.response?.data || "Failed to send message", {
+          cause: 500,
+        })
+      )
+    );
+  } else {
+    // Prompt user to select the missing option
+    const missingOption = session.selections.specialty
+      ? "time slot"
+      : "specialty";
+    await sendWhatsAppMessage(
+      sampletext({
+        textResponse: `Please select a ${missingOption} to continue.`,
+        number: from,
+      })
+    ).catch((error) =>
+      next(
+        new Error(error?.response?.data || "Failed to send message", {
+          cause: 500,
+        })
+      )
+    );
+  }
 };
