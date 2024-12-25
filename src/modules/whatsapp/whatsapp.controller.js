@@ -25,15 +25,20 @@ const userSessions = {};
 
 // ============== Receive Message ==============
 export const receivedMessage = asyncHandler(async (req, res, next) => {
+  console.log("Webhook Payload:", JSON.stringify(req.body, null, 2));
+
   const messages = req.body.entry?.[0]?.changes?.[0]?.value?.messages;
+
   if (!messages || !messages.length) {
-    const { conversation_id } = req.body.entry?.[0]?.changes?.[0]?.value;
-    return next(
-      new Error("No messages found", { cause: 404, conversation_id })
+    console.error(
+      "No messages found in payload:",
+      JSON.stringify(req.body, null, 2)
     );
+    return next(new Error("No messages found", { cause: 404 }));
   }
 
-  console.log(messages);
+  console.log("Messages:", messages);
+
   const { from, id, type } = messages[0];
 
   try {
@@ -61,6 +66,7 @@ export const receivedMessage = asyncHandler(async (req, res, next) => {
         await handleInteractiveMessage(messages, session, next);
         break;
       default:
+        console.error("Unsupported message type:", type);
         return next(new Error("Message type not found", { cause: 404 }));
     }
   } catch (error) {
@@ -71,8 +77,8 @@ export const receivedMessage = asyncHandler(async (req, res, next) => {
   }
 
   userSessions[from] = session;
+
   if (!res.headersSent) {
     res.status(200).json({ message: "ok" });
   }
 });
-

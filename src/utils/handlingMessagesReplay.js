@@ -1,6 +1,6 @@
 import { sendWhatsAppMessage } from "../services/whatsapp.services.js";
 import { sampleConfirmMenu, sampleMenu, sampleMultiSelectMenu, samplePaymentGateWay, sampletext } from "../shared/sampleModels.js";
-import { findItemById, getPrice } from "./MenuItems.js";
+import { findItemById } from "./MenuItems.js";
 
 export const handleTextMessage = async (messages, next) => {
   const { from } = messages[0];

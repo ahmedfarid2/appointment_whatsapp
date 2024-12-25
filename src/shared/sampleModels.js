@@ -1,6 +1,4 @@
-import {
-  menuItemsList,
-} from "../utils/MenuItems.js";
+import { specialtiesList, timesList } from "../utils/MenuItems.js";
 
 export function sampletext({ textResponse, number }) {
   return JSON.stringify({
@@ -158,7 +156,6 @@ export function sampleConfirmMenu({ number, selections }) {
     },
   });
 }
-
 
 export function samplePaymentGateWay({ number, totalPrice }) {
   const url = `https://developer.paypal.com/home/`;

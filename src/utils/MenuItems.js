@@ -9,17 +9,8 @@ export const findItemById = (searchKey) => {
   if (item) {
     const listName = getListItemName(item);
     return { item, listName };
-  } else {
-    const item = Object.values(menuItemsList).find(
-      (item) => item.id === searchKey
-    );
-
-    if (item) {
-      return { item, listName: "menuItems" };
-    } else {
-      return { item: null, listName: "unknown" };
-    }
   }
+  return { item: null, listName: "unknown" };
 };
 
 export const getPrice = (item) => {
