@@ -1,8 +1,4 @@
 import {
-  dessertsList,
-  drinksList,
-  foodsList,
-  getPrice,
   menuItemsList,
 } from "../utils/MenuItems.js";
 
@@ -63,27 +59,29 @@ export function sampleMenu({ number }) {
       type: "button",
       header: {
         type: "text",
-        text: "Feel free to choose your meal with a dessert and a drink",
+        text: "Please select an option",
       },
       body: {
-        text: "Select your favorite foods, desserts, and drinks!",
+        text: "Choose one of the options below.",
       },
       footer: {
-        text: "Thank you for your order!",
+        text: "Thank you!",
       },
       action: {
         buttons: [
           {
             type: "reply",
-            reply: menuItemsList.foods,
+            reply: {
+              id: "specialty_options",
+              title: "Select Specialty",
+            },
           },
           {
             type: "reply",
-            reply: menuItemsList.desserts,
-          },
-          {
-            type: "reply",
-            reply: menuItemsList.drinks,
+            reply: {
+              id: "time_options",
+              title: "Select Time Slot",
+            },
           },
         ],
       },
@@ -93,23 +91,17 @@ export function sampleMenu({ number }) {
 
 export function sampleMultiSelectMenu({ number, optionId }) {
   const sections = [];
-  if (optionId === "food_options") {
+  if (optionId === "specialty_options") {
     sections.push({
-      title: "Foods",
-      rows: [...foodsList],
+      title: "Available Specialties",
+      rows: [...specialtiesList],
     });
-  } else if (optionId === "dessert_options") {
+  } else if (optionId === "time_options") {
     sections.push({
-      title: "Desserts",
-      rows: [...dessertsList],
-    });
-  } else if (optionId === "drink_options") {
-    sections.push({
-      title: "Drinks",
-      rows: [...drinksList],
+      title: "Available Time Slots",
+      rows: [...timesList],
     });
   }
-  console.log({ sections });
   return JSON.stringify({
     messaging_product: "whatsapp",
     to: number,
@@ -118,10 +110,10 @@ export function sampleMultiSelectMenu({ number, optionId }) {
       type: "list",
       header: {
         type: "text",
-        text: `Select your favorite ${optionId}`,
+        text: `Select your ${optionId.replace("_options", "")}`,
       },
       body: {
-        text: `Select your favorite ${optionId}`,
+        text: "Choose an option below.",
       },
       action: {
         button: "Select",
@@ -130,8 +122,8 @@ export function sampleMultiSelectMenu({ number, optionId }) {
     },
   });
 }
+
 export function sampleConfirmMenu({ number, selections }) {
-  const totalPrice = selections.reduce((acc, item) => acc + getPrice(item), 0);
   return JSON.stringify({
     messaging_product: "whatsapp",
     to: number,
@@ -140,24 +132,13 @@ export function sampleConfirmMenu({ number, selections }) {
       type: "button",
       header: {
         type: "text",
-        text: `Confirm your order: ${selections
-          .map((item) => item.title)
-          .join(", ")} ($${totalPrice.toFixed(2)})`,
+        text: `Confirm your appointment with ${selections[0].title} on ${selections[1].title}`,
       },
       body: {
-        text: `Confirm your order: ${selections
-          .map((item) => item.title)
-          .join(", ")} ($${totalPrice.toFixed(2)})`,
+        text: "Please confirm or cancel your appointment.",
       },
       action: {
         buttons: [
-          {
-            type: "reply",
-            reply: {
-              id: "ask_for_more",
-              title: "Ask for more",
-            },
-          },
           {
             type: "reply",
             reply: {
@@ -177,6 +158,7 @@ export function sampleConfirmMenu({ number, selections }) {
     },
   });
 }
+
 
 export function samplePaymentGateWay({ number, totalPrice }) {
   const url = `https://developer.paypal.com/home/`;

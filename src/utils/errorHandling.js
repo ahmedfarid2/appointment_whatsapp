@@ -8,12 +8,12 @@ export const asyncHandler = (API) => {
 };
 
 export const globalResponse = (err, req, res, next) => {
-  if (err) {
-    console.log({ err });
-
-    if (req.error) {
-      return res.status(err["cause"] || 500).json({ ErrorMsg: req.error });
-    }
-    return res.status(err["cause"] || 500).json({ ErrorMsg: err.message });
+  if (res.headersSent) {
+    return next(err); 
   }
+
+  console.error("Global Error:", err);
+  const errorMessage =
+    typeof err.message === "object" ? JSON.stringify(err.message) : err.message;
+  res.status(err.cause || 500).json({ ErrorMsg: errorMessage });
 };

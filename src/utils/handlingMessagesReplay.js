@@ -1,20 +1,28 @@
-import { sendWhatsAppMessage } from "../services/whatsappService.js";
+import { sendWhatsAppMessage } from "../services/whatsapp.services.js";
 import { sampleConfirmMenu, sampleMenu, sampleMultiSelectMenu, samplePaymentGateWay, sampletext } from "../shared/sampleModels.js";
 import { findItemById, getPrice } from "./MenuItems.js";
 
 export const handleTextMessage = async (messages, next) => {
   const { from } = messages[0];
-  await sendWhatsAppMessage(sampleMenu({ number: from })).catch((error) =>
+  try {
+    await sendWhatsAppMessage(sampleMenu({ number: from }));
+  } catch (error) {
+    console.error(
+      "Error in handleTextMessage:",
+      error.response?.data || error.message
+    );
     next(
-      new Error(error?.response.data || "Failed to send message", {
-        cause: 500,
-      })
-    )
-  );
+      new Error(
+        JSON.stringify(error.response?.data || "Failed to send message"),
+        { cause: 500 }
+      )
+    );
+  }
 };
 
+
 export const handleInteractiveMessage = async (messages, session, next) => {
-      const { from, interactive: { button_reply, list_reply } = {} } = messages[0];
+  const { from, interactive: { button_reply, list_reply } = {} } = messages[0];
 
   if (button_reply) {
     await handleButtonReply(button_reply, from, session, next);
@@ -30,7 +38,7 @@ export const handleButtonReply = async (button_reply, from, session, next) => {
   switch (buttonId) {
     case "cancel":
       await sendWhatsAppMessage(
-        sampletext({ textResponse: "Goodbye!", number: from })
+        sampletext({ textResponse: "Appointment booking canceled.", number: from })
       ).catch((error) =>
         next(
           new Error(error?.response.data || "Failed to send message", {
@@ -41,10 +49,10 @@ export const handleButtonReply = async (button_reply, from, session, next) => {
       delete userSessions[from];
       break;
     case "confirm":
-      if (!session.selections.length) {
+      if (!session.selections.specialty || !session.selections.time) {
         await sendWhatsAppMessage(
           sampletext({
-            textResponse: "You have not selected any items",
+            textResponse: "You must select a specialty and a time slot.",
             number: from,
           })
         ).catch((error) =>
@@ -55,8 +63,12 @@ export const handleButtonReply = async (button_reply, from, session, next) => {
           )
         );
       } else {
+        const { specialty, time } = session.selections;
         await sendWhatsAppMessage(
-          samplePaymentGateWay({ number: from, totalPrice: session.totalPrice })
+          sampletext({
+            textResponse: `Your appointment with a ${specialty.title} specialist is confirmed for the ${time.title}.`,
+            number: from,
+          })
         ).catch((error) =>
           next(
             new Error(error?.response.data || "Failed to send message", {
@@ -67,20 +79,12 @@ export const handleButtonReply = async (button_reply, from, session, next) => {
         delete userSessions[from];
       }
       break;
-    case "ask_for_more":
-      await sendWhatsAppMessage(sampleMenu({ number: from })).catch((error) =>
-        next(
-          new Error(error?.response.data || "Failed to send message", {
-            cause: 500,
-          })
-        )
-      );
-      break;
     default:
-      const { listName } = findItemById(buttonId);
-      if (listName !== "unknown") {
+      const { item, listName } = findItemById(buttonId);
+      if (listName === "specialtiesList") {
+        session.selections.specialty = item;
         await sendWhatsAppMessage(
-          sampleMultiSelectMenu({ number: from, optionId: buttonId })
+          sampleMultiSelectMenu({ number: from, optionId: "time_options" })
         ).catch((error) =>
           next(
             new Error(error?.response.data || "Failed to send message", {
@@ -89,7 +93,9 @@ export const handleButtonReply = async (button_reply, from, session, next) => {
           )
         );
       } else {
-        await sendWhatsAppMessage(sampleMenu({ number: from })).catch((error) =>
+        await sendWhatsAppMessage(
+          sampleMultiSelectMenu({ number: from, optionId: "specialty_options" })
+        ).catch((error) =>
           next(
             new Error(error?.response.data || "Failed to send message", {
               cause: 500,
@@ -104,10 +110,19 @@ export const handleButtonReply = async (button_reply, from, session, next) => {
 export const handleListReply = async (list_reply, from, session, next) => {
   const { id: listId } = list_reply;
   const { item } = findItemById(listId);
-  session.selections.push(item);
-  session.totalPrice += getPrice(item);
+
+  if (item && item.title) {
+    session.selections.time = item;
+  }
+
   await sendWhatsAppMessage(
-    sampleConfirmMenu({ number: from, selections: [...session.selections] })
+    sampleConfirmMenu({
+      number: from,
+      selections: [
+        { title: session.selections.specialty.title },
+        { title: session.selections.time.title },
+      ],
+    })
   ).catch((error) =>
     next(
       new Error(error?.response.data || "Failed to send message", {

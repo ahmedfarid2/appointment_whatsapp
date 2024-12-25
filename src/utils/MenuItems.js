@@ -1,12 +1,11 @@
 const getListItemName = (item) => {
-  if (foodsList.includes(item)) return "foodsList";
-  if (dessertsList.includes(item)) return "dessertsList";
-  if (drinksList.includes(item)) return "drinksList";
+  if (specialtiesList.includes(item)) return "specialtiesList";
+  if (timesList.includes(item)) return "timesList";
 };
 
 export const findItemById = (searchKey) => {
-  const allFoodItems = [...foodsList, ...dessertsList, ...drinksList];
-  const item = allFoodItems.find((item) => item.id === searchKey);
+  const allItems = [...specialtiesList, ...timesList];
+  const item = allItems.find((item) => item.id === searchKey);
   if (item) {
     const listName = getListItemName(item);
     return { item, listName };
@@ -33,68 +32,50 @@ export const getPrice = (item) => {
     return null; // no price found
   }
 };
-export const dessertsList = [
+
+export const specialtiesList = [
   {
-    id: "chocolate",
-    title: "شوكولاتة",
-    description: "السعر 8$",
+    id: "cardiology",
+    title: "Cardiology",
+    description: "Specialist for heart-related issues.",
   },
   {
-    id: "strawberry",
-    title: "فراولة",
-    description: "السعر 9$",
+    id: "dermatology",
+    title: "Dermatology",
+    description: "Specialist for skin-related issues.",
   },
   {
-    id: "vanilla",
-    title: "فانيليا",
-    description: "السعر 6$",
-  },
-];
-export const foodsList = [
-  {
-    id: "chicken",
-    title: "دجاج",
-    description: "السعر 10$",
-  },
-  {
-    id: "beef",
-    title: "لحم بقر",
-    description: "السعر 12$",
-  },
-  {
-    id: "fish",
-    title: "لحم سمك",
-    description: "السعر 14$",
+    id: "pediatrics",
+    title: "Pediatrics",
+    description: "Specialist for child-related issues.",
   },
 ];
-export const drinksList = [
+
+export const timesList = [
   {
-    id: "coke",
-    title: "كولا",
-    description: "السعر 5$",
+    id: "morning",
+    title: "Morning Slot",
+    description: "Available from 9 AM to 12 PM.",
   },
   {
-    id: "pepsi",
-    title: "بيبسي",
-    description: "السعر 5$",
+    id: "afternoon",
+    title: "Afternoon Slot",
+    description: "Available from 1 PM to 4 PM.",
   },
   {
-    id: "orange_juice",
-    title: "عصير برتقال",
-    description: "السعر 7$",
+    id: "evening",
+    title: "Evening Slot",
+    description: "Available from 5 PM to 8 PM.",
   },
 ];
+
 export const menuItemsList = {
-  foods: {
-    id: "food_options",
-    title: "خيارات الطعام",
+  specialties: {
+    id: "specialty_options",
+    title: "Specialty Options",
   },
-  desserts: {
-    id: "dessert_options",
-    title: "خيارات الحلويات",
-  },
-  drinks: {
-    id: "drink_options",
-    title: "خيارات المشروبات",
+  times: {
+    id: "time_options",
+    title: "Available Time Slots",
   },
 };

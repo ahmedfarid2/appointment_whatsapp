@@ -1,10 +1,10 @@
-import { markMessageAsRead } from "../services/whatsappService.js";
+import { markMessageAsRead } from "../../services/whatsapp.services.js";
 
-import { asyncHandler } from "../utils/errorHandling.js";
+import { asyncHandler } from "../../utils/errorHandling.js";
 import {
   handleInteractiveMessage,
   handleTextMessage,
-} from "../utils/handlingMessagesReplay.js";
+} from "../../utils/handlingMessagesReplay.js";
 
 export const verifyToken = asyncHandler(async (req, res, next) => {
   const { query } = req;
@@ -32,12 +32,17 @@ export const receivedMessage = asyncHandler(async (req, res, next) => {
       new Error("No messages found", { cause: 404, conversation_id })
     );
   }
+
   console.log(messages);
   const { from, id, type } = messages[0];
 
   try {
     await markMessageAsRead(id);
   } catch (error) {
+    console.error(
+      "Failed to mark message as read:",
+      error.response?.data || error.message
+    );
     return next(new Error("Failed to mark message as read", { cause: 500 }));
   }
 
@@ -59,8 +64,15 @@ export const receivedMessage = asyncHandler(async (req, res, next) => {
         return next(new Error("Message type not found", { cause: 404 }));
     }
   } catch (error) {
-    return next(new Error(error?.message || error, { cause: 500 }));
+    console.error("Error processing message:", error.message);
+    return next(
+      new Error(error.message || "Internal Server Error", { cause: 500 })
+    );
   }
+
   userSessions[from] = session;
-  res.status(200).json({ message: "ok" });
+  if (!res.headersSent) {
+    res.status(200).json({ message: "ok" });
+  }
 });
+
